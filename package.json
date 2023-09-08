@@ -1,0 +1,22 @@
+{
+  "name": "maintenance-requester-ddd-typescript",
+  "version": "0.0.0",
+  "description": "A study case of the application of the DDD concepts",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maucaruso/maintenance-requester-ddd-typescript.git"
+  },
+  "keywords": [
+    "ddd"
+  ],
+  "author": "Maurici Caruso Junior",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/maucaruso/maintenance-requester-ddd-typescript/issues"
+  },
+  "homepage": "https://github.com/maucaruso/maintenance-requester-ddd-typescript#readme"
+}
