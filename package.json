@@ -4,7 +4,8 @@
   "description": "A study case of the application of the DDD concepts",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "prettier-watch": "npx onchange \"**/*.ts\" -- npx prettier --write --ignore-unknown {{changed}}"
   },
   "repository": {
     "type": "git",
@@ -21,7 +22,14 @@
   "homepage": "https://github.com/maucaruso/maintenance-requester-ddd-typescript#readme",
   "devDependencies": {
     "@types/jest": "^29.5.4",
+    "@typescript-eslint/eslint-plugin": "^6.6.0",
+    "@typescript-eslint/parser": "^6.6.0",
+    "eslint": "^8.49.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.28.1",
     "jest": "^29.6.4",
+    "prettier": "3.0.3",
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2"
   },
