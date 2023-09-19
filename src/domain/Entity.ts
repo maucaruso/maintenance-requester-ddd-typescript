@@ -1,14 +1,12 @@
-import { IUuidAdapter } from '@shared/interfaces/IUuidAdapter';
+import { IUuidAdapter } from '@domain/IUuidAdapter';
 
 abstract class Entity {
   id: string;
 
   constructor(uuid: IUuidAdapter) {
-    if (this.id) {
-      return;
+    if (!this.id) {
+      this.id = uuid.generateUuid();
     }
-
-    this.id = uuid.generateUuid();
   }
 }
 
