@@ -13,7 +13,8 @@
       "@infra/*": ["src/infra/*"],
       "@domain/*": ["src/domain/*"],
       "@app/*": ["src/app/*"],
-      "@presentation/*": ["src/presentation/*"]
+      "@presentation/*": ["src/presentation/*"],
+      "@helpers/*": ["src/helpers/*"]
     },                             
    
     "resolveJsonModule": true,                      
