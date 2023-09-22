@@ -10,7 +10,9 @@ const makeUuidSpy = () => {
 describe('Subsidiary Entity Test', () => {
   it('Should register a with the correct name', () => {
     const sut = new Subsidiary(makeUuidSpy(), 'valid_name');
+
     expect(sut).toHaveProperty('name');
+    expect(sut.name).toBe('valid_name');
   });
 
   it('Should throws when a name was not specified', () => {
