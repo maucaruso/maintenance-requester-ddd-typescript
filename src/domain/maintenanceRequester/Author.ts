@@ -8,7 +8,7 @@ class Author {
 
   constructor(identifier: number, name: string) {
     DomainException.throwsWhen(
-      isNotANumber(name),
+      isNotANumber(identifier),
       'Invalid requester identifier'
     );
 
