@@ -1,7 +1,7 @@
 import { MaintenanceRequester } from './MaintenanceRequester';
 
 interface ICancelPendingMaintenanceRequester {
-  cancelar(maintenanceRequester: MaintenanceRequester): void;
+  cancel(pendingMaintenanceRequests: MaintenanceRequester[]): void;
 }
 
 export { ICancelPendingMaintenanceRequester };
