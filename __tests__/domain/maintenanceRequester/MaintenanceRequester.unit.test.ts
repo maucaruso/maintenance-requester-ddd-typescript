@@ -103,4 +103,13 @@ describe('Maintenance Requester Entity Test', () => {
     sut.cancel();
     expect(sut.requestStatus).toBe(RequestStatusEnum.Canceled);
   });
+
+  test.each([
+    ['invalidJustification', ''],
+    ['invalidJustification', null],
+  ])('Should validate the justification', (_key, invalidJustification) => {
+    sutMock.justification = invalidJustification;
+    const expectedMessage = 'Invalid justification';
+    expect(() => makeSut()).toThrow(expectedMessage);
+  });
 });
