@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
+import { Author } from '@domain/maintenanceRequester/Author';
 import { MaintenanceRequester } from '@domain/maintenanceRequester/MaintenanceRequester';
 import { MaintenanceRequestTypeEnum } from '@domain/maintenanceRequester/MaintenanceRequestTypeEnum';
 import { RequestStatusEnum } from '@domain/maintenanceRequester/RequestStatusEnum';
+import { decreaseDays } from '@helpers/decreaseDays';
 import { increaseMonths } from '@helpers/increaseMonths';
 import { UuidAdapter } from '@infra/adapters/UuidAdapter';
 
@@ -111,5 +113,55 @@ describe('Maintenance Requester Entity Test', () => {
     sutMock.justification = invalidJustification;
     const expectedMessage = 'Invalid justification';
     expect(() => makeSut()).toThrow(expectedMessage);
+  });
+
+  it('Should validate the desired maintenance start date', () => {
+    const invalidDate = decreaseDays(new Date(), 1);
+    sutMock.desiredMaintenanceStartDate = invalidDate;
+
+    const expectedMessage =
+      'The desired maintenance start date cannot be less than the current date';
+
+    expect(() => makeSut()).toThrow(expectedMessage);
+  });
+
+  it('Should disapprove the maintenance request', () => {
+    const approver = new Author(1, 'Repprover');
+    const maintenanceRequest = makeSut();
+
+    maintenanceRequest.disapprove(approver);
+
+    expect(maintenanceRequest.disapproved()).toBe(true);
+    expect(maintenanceRequest.requestStatus).toBe(
+      RequestStatusEnum.Disapproved
+    );
+  });
+
+  it('Should inform the approver of the disapproval', () => {
+    const approver = new Author(1, 'Repprover');
+    const maintenanceRequest = makeSut();
+
+    maintenanceRequest.disapprove(approver);
+
+    expect(maintenanceRequest.approver).toBe(approver);
+  });
+
+  it('Should be able to approve the maintenance request', () => {
+    const approver = new Author(1, 'Approver');
+    const maintenanceRequest = makeSut();
+
+    maintenanceRequest.approve(approver);
+
+    expect(maintenanceRequest.approved()).toBe(true);
+    expect(maintenanceRequest.requestStatus).toBe(RequestStatusEnum.Approved);
+  });
+
+  it('Should inform the approver of the approval', () => {
+    const approver = new Author(1, 'Approver');
+    const maintenanceRequest = makeSut();
+
+    maintenanceRequest.approve(approver);
+
+    expect(maintenanceRequest.approver).toBe(approver);
   });
 });
