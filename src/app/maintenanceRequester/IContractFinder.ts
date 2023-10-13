@@ -1,7 +1,7 @@
 import { ContractDto } from './ContractDto';
 
 interface IContractFinder {
-  search(): Promise<ContractDto>;
+  search(contractNumber: string): Promise<ContractDto>;
 }
 
 export { IContractFinder };
