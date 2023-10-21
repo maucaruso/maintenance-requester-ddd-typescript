@@ -4,7 +4,7 @@ import { MaintenanceRequester } from './MaintenanceRequester';
 class CancelPendingMaintenanceRequester
   implements ICancelPendingMaintenanceRequester
 {
-  cancel(pendingMaintenanceRequests: MaintenanceRequester[]) {
+  async cancel(pendingMaintenanceRequests: MaintenanceRequester[]) {
     if (!pendingMaintenanceRequests) {
       return;
     }
