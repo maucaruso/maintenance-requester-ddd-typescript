@@ -27,14 +27,26 @@ const makeMaintenanceRequesterMock = (dto: ApprovalAnalysisDto) => {
       RequestStatusEnum.Disapproved;
   });
 
+  mockedPendingMaintenanceRequest.disapproved.mockImplementation(() => {
+    return (
+      mockedPendingMaintenanceRequest.requestStatus ===
+      RequestStatusEnum.Disapproved
+    );
+  });
+
+  mockedPendingMaintenanceRequest.approved.mockImplementation(() => {
+    return (
+      mockedPendingMaintenanceRequest.requestStatus ===
+      RequestStatusEnum.Approved
+    );
+  });
+
   return mockedPendingMaintenanceRequest;
 };
 
 const makeMaintenanceRequesterRepositoryMock = (
   maintenanceRequesterMock: MaintenanceRequester[]
 ) => {
-  console.log('maintenanceRequesterMock----', maintenanceRequesterMock);
-
   class MaintenanceRequesterRepository
     implements IMaintenanceRequesterRepository
   {
@@ -78,21 +90,20 @@ const makeNotifyDisapprovalToRequesterMock = () => {
 const makeNotifyServiceContextMock = () => {
   class NotifyServiceContext implements INotifyServiceContext {
     async notify() {
-      throw new Error('Not implemented');
+      // console.log('not implemented');
     }
   }
 
   return new NotifyServiceContext();
 };
 
-const makeSut = (maintenanceRequesterMock: MaintenanceRequester[]) => {
+const makeSut = (
+  maintenanceRequesterMock: MaintenanceRequester[],
+  mockedNotifyDisapprovalToRequester = makeNotifyDisapprovalToRequesterMock(),
+  mockedNotifyServiceContext = makeNotifyServiceContextMock()
+) => {
   const mockedMaintenanceRequesterRepository =
     makeMaintenanceRequesterRepositoryMock(maintenanceRequesterMock);
-
-  const mockedNotifyDisapprovalToRequester =
-    makeNotifyDisapprovalToRequesterMock();
-
-  const mockedNotifyServiceContext = makeNotifyServiceContextMock();
 
   const sut = new ApprovalAnalysisOfMaintenanceRequester(
     mockedMaintenanceRequesterRepository,
@@ -103,16 +114,20 @@ const makeSut = (maintenanceRequesterMock: MaintenanceRequester[]) => {
   return { sut };
 };
 
+const makeDto = () => {
+  const dto = Object.assign(new ApprovalAnalysisDto(), {
+    approverIdentifier: 1,
+    approverName: 'Mario',
+    requestIdentifier: 'XPTO',
+  });
+
+  return { dto };
+};
+
 describe('Approval Analysis Of Maintenance Requester', () => {
   it('Should disapprove the maintenance request', async () => {
-    const dto = Object.assign(new ApprovalAnalysisDto(), {
-      approverIdentifier: 1,
-      approverName: 'Mario',
-      requestIdentifier: 'XPTO',
-    });
-
+    const { dto } = makeDto();
     const maintenanceRequestMock = [makeMaintenanceRequesterMock(dto)];
-
     const { sut } = makeSut(maintenanceRequestMock);
 
     await sut.analyze(dto);
@@ -122,19 +137,119 @@ describe('Approval Analysis Of Maintenance Requester', () => {
     );
   });
 
-  // it('Should validate the maintenance request to be analysed', () => {});
+  it('Should validate the maintenance request to be analysed', async () => {
+    const { dto } = makeDto();
+    const maintenanceRequestMock = [makeMaintenanceRequesterMock(dto)];
+    const { sut } = makeSut(maintenanceRequestMock);
+    const expectedMessage = 'Maintenence request not found';
+    const invalidRequestIdentifier = 'WERT';
 
-  // it('Should validate the maintenance request when it was already disapproved', () => {});
+    expect(async () =>
+      sut.analyze({
+        ...dto,
+        requestIdentifier: invalidRequestIdentifier,
+      })
+    ).rejects.toThrow(expectedMessage);
+  });
 
-  // it('Should validate the maintenance request when it was already approved', () => {});
+  it('Should validate the maintenance request when it was already disapproved', async () => {
+    const { dto } = makeDto();
+    const maintenanceRequestMock = [makeMaintenanceRequesterMock(dto)];
+    maintenanceRequestMock[0].disapprove();
+    const { sut } = makeSut(maintenanceRequestMock);
+    const expectedMessage = 'This maintenance request was disapproved';
 
-  // it('Should notify the requester about the dissaproval', () => {});
+    expect(async () => sut.analyze(dto)).rejects.toThrow(expectedMessage);
+  });
 
-  // it('Should approve the maintenance request', () => {});
+  it('Should validate the maintenance request when it was already approved', () => {
+    const { dto } = makeDto();
+    const maintenanceRequestMock = [makeMaintenanceRequesterMock(dto)];
+    maintenanceRequestMock[0].approve();
+    const { sut } = makeSut(maintenanceRequestMock);
+    const expectedMessage = 'This maintenance request was approved';
 
-  // it('Should not notify the requester when approved', () => {});
+    expect(async () => sut.analyze(dto)).rejects.toThrow(expectedMessage);
+  });
 
-  // it('Should notify the service context when the maintenance request is approved', () => {});
+  it('Should notify the requester about the dissaproval', () => {
+    const { dto } = makeDto();
+    const maintenanceRequestMock = [makeMaintenanceRequesterMock(dto)];
+    maintenanceRequestMock[0].approve();
+    const { sut } = makeSut(maintenanceRequestMock);
+    const expectedMessage = 'This maintenance request was approved';
 
-  // it('Should not notify the service context when the maintenance request is dissaproved', () => {});
+    expect(async () => sut.analyze(dto)).rejects.toThrow(expectedMessage);
+  });
+
+  it('Should approve the maintenance request', async () => {
+    const { dto } = makeDto();
+    dto.approved = true;
+    const maintenanceRequestMock = [makeMaintenanceRequesterMock(dto)];
+    const { sut } = makeSut(maintenanceRequestMock);
+
+    await sut.analyze(dto);
+
+    expect(maintenanceRequestMock[0].requestStatus).toBe(
+      RequestStatusEnum.Approved
+    );
+  });
+
+  it('Should not notify the requester when approved', async () => {
+    const { dto } = makeDto();
+    dto.approved = true;
+    const maintenanceRequestMock = [makeMaintenanceRequesterMock(dto)];
+    const mockedNotifyDisapprovalToRequester =
+      makeNotifyDisapprovalToRequesterMock();
+    const { sut } = makeSut(
+      maintenanceRequestMock,
+      mockedNotifyDisapprovalToRequester
+    );
+
+    const spy = jest.spyOn(mockedNotifyDisapprovalToRequester, 'notify');
+
+    await sut.analyze(dto);
+
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('Should notify the service context when the maintenance request is approved', async () => {
+    const { dto } = makeDto();
+    dto.approved = true;
+    const maintenanceRequestMock = [makeMaintenanceRequesterMock(dto)];
+    const mockedNotifyDisapprovalToRequester =
+      makeNotifyDisapprovalToRequesterMock();
+    const mockedNotifyServiceContext = makeNotifyServiceContextMock();
+    const { sut } = makeSut(
+      maintenanceRequestMock,
+      mockedNotifyDisapprovalToRequester,
+      mockedNotifyServiceContext
+    );
+
+    const spy = jest.spyOn(mockedNotifyServiceContext, 'notify');
+
+    await sut.analyze(dto);
+
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('Should not notify the service context when the maintenance request is dissaproved', async () => {
+    const { dto } = makeDto();
+    dto.approved = false;
+    const maintenanceRequestMock = [makeMaintenanceRequesterMock(dto)];
+    const mockedNotifyDisapprovalToRequester =
+      makeNotifyDisapprovalToRequesterMock();
+    const mockedNotifyServiceContext = makeNotifyServiceContextMock();
+    const { sut } = makeSut(
+      maintenanceRequestMock,
+      mockedNotifyDisapprovalToRequester,
+      mockedNotifyServiceContext
+    );
+
+    const spy = jest.spyOn(mockedNotifyServiceContext, 'notify');
+
+    await sut.analyze(dto);
+
+    expect(spy).not.toHaveBeenCalled();
+  });
 });
