@@ -1,93 +1,18 @@
-/* eslint-disable max-classes-per-file */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
-import { ContractDto } from '@app/maintenanceRequester/ContractDto';
 import { IContractFinder } from '@app/maintenanceRequester/IContractFinder';
-import { MaintenanceRequesterDto } from '@app/maintenanceRequester/MaintenanceRequesterDto';
 import { MaintenanceRequesterFactory } from '@app/maintenanceRequester/MaintenanceRequesterFactory';
 import { ISubsidiaryRepository } from '@app/subsidiaries/ISubsidiaryRepository';
-import { MaintenanceRequestTypeEnum } from '@domain/maintenanceRequester/MaintenanceRequestTypeEnum';
-import { Subsidiary } from '@domain/subsidiaries/Subsidiary';
-import { increaseMonths } from '@helpers/increaseMonths';
 import { UuidAdapter } from '@infra/adapters/UuidAdapter';
 
-jest.mock('@domain/subsidiaries/Subsidiary');
-
-const makeUuidMock = () => {
-  const uuidAdapter = new UuidAdapter();
-  uuidAdapter.generateUuid = jest.fn().mockReturnValue('any_uuid');
-  return { uuidAdapter };
-};
-
-const makeMaintenanceRequestDto = () => {
-  const maintenanceRequestDto = Object.assign(new MaintenanceRequesterDto(), {
-    subsidiaryIdentifier: 'XPTO-ABC',
-    requesterIdentifier: 1,
-    requesterName: 'Ricardo José',
-    maintenanceRequestType: MaintenanceRequestTypeEnum.Gardening,
-    justification: 'High Grass',
-    contractNumber: '2135',
-    desiredMaintenanceStartDate: increaseMonths(new Date(), 2),
-  });
-
-  return { maintenanceRequestDto };
-};
-
-const makeContractDto = (maintenanceRequestDto: MaintenanceRequesterDto) => {
-  const contractDto = Object.assign(new ContractDto(), {
-    number: maintenanceRequestDto.contractNumber,
-    outsourcedName: 'Grass SA',
-    outsourcedCnpj: '00000000000000',
-    contractMaganer: 'Edivaldo Pereira',
-    finalContractData: increaseMonths(new Date(), 1),
-  });
-
-  return { contractDto };
-};
-
-const makeSubsidiary = (maintenanceRequestDto: MaintenanceRequesterDto) => {
-  const mockedSubsidiary = new Subsidiary() as jest.Mocked<Subsidiary>;
-  mockedSubsidiary.id = maintenanceRequestDto.subsidiaryIdentifier;
-
-  return { mockedSubsidiary };
-};
-
-const makeSubsidiaryRepository = (subsidiary: Subsidiary) => {
-  class SubsidiaryRepository implements ISubsidiaryRepository {
-    search(): Promise<Subsidiary[]> {
-      throw new Error('Method not implemented.');
-    }
-    searchById(id: string): Promise<Subsidiary> {
-      return subsidiary;
-    }
-    add(entity: Subsidiary): Promise<void> {
-      throw new Error('Method not implemented.');
-    }
-  }
-
-  const subsidiaryRepository = new SubsidiaryRepository();
-
-  return { subsidiaryRepository };
-};
-
-const makeContractFinder = (
-  maintenanceRequestDto: MaintenanceRequesterDto,
-  contractDto: ContractDto
-) => {
-  class ContractFinder implements IContractFinder {
-    async search(contractNumber: string) {
-      return contractDto;
-    }
-  }
-
-  const contractFinder = new ContractFinder();
-
-  return { contractFinder };
-};
+import { makeContractDto } from '../__mocks__/makeContractDto';
+import { makeContractFinder } from '../__mocks__/makeContractFinder';
+import { makeMaintenanceRequestDto } from '../__mocks__/makeMaintenanceRequestDto';
+import { makeSubsidiary } from '../__mocks__/makeSubsidiary';
+import { makeSubsidiaryRepository } from '../__mocks__/makeSubsidiaryRepository';
+import { makeUuidMock } from '../__mocks__/makeUuidMock';
 
 const makeSut = (
-  subsidiaryRepository: SubsidiaryRepository,
-  contractFinder: ContractFinder,
+  subsidiaryRepository: ISubsidiaryRepository,
+  contractFinder: IContractFinder,
   uuidMock: UuidAdapter
 ) => {
   const sut = new MaintenanceRequesterFactory(
