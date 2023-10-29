@@ -3,12 +3,12 @@ import { MaintenanceRequesterFactory } from '@app/maintenanceRequester/Maintenan
 import { ISubsidiaryRepository } from '@app/subsidiaries/ISubsidiaryRepository';
 import { UuidAdapter } from '@infra/adapters/UuidAdapter';
 
-import { makeContractDto } from '../__mocks__/makeContractDto';
-import { makeContractFinder } from '../__mocks__/makeContractFinder';
-import { makeMaintenanceRequestDto } from '../__mocks__/makeMaintenanceRequestDto';
-import { makeSubsidiary } from '../__mocks__/makeSubsidiary';
-import { makeSubsidiaryRepository } from '../__mocks__/makeSubsidiaryRepository';
-import { makeUuidMock } from '../__mocks__/makeUuidMock';
+import { makeContractDtoMock } from '../__mocks__/makeContractDtoMock';
+import { makeContractFinderMock } from '../__mocks__/makeContractFinderMock';
+import { makeMaintenanceRequestDtoMock } from '../__mocks__/makeMaintenanceRequestDtoMock';
+import { makeSubsidiaryMock } from '../__mocks__/makeSubsidiaryMock';
+import { makeSubsidiaryRepositoryMock } from '../__mocks__/makeSubsidiaryRepositoryMock';
+import { makeUuidAdapterMock } from '../__mocks__/makeUuidAdapterMock';
 
 const makeSut = (
   subsidiaryRepository: ISubsidiaryRepository,
@@ -26,79 +26,99 @@ const makeSut = (
 
 describe('Maintenance Requester Factory', () => {
   it('The maintenance request should have the searched contract data', async () => {
-    const { uuidAdapter } = makeUuidMock();
-    const { maintenanceRequestDto } = makeMaintenanceRequestDto();
-    const { contractDto } = makeContractDto(maintenanceRequestDto);
-    const { mockedSubsidiary } = makeSubsidiary(maintenanceRequestDto);
-    const { subsidiaryRepository } = makeSubsidiaryRepository(mockedSubsidiary);
-    const { contractFinder } = makeContractFinder(
-      maintenanceRequestDto,
-      contractDto
+    const { uuidAdapterMock } = makeUuidAdapterMock();
+    const { maintenanceRequestDtoMock } = makeMaintenanceRequestDtoMock();
+    const { contractDtoMock } = makeContractDtoMock(maintenanceRequestDtoMock);
+    const { subsidiaryMock } = makeSubsidiaryMock(maintenanceRequestDtoMock);
+    const { subsidiaryRepositoryMock } =
+      makeSubsidiaryRepositoryMock(subsidiaryMock);
+    const { contractFinderMock } = makeContractFinderMock(
+      maintenanceRequestDtoMock,
+      contractDtoMock
     );
-    const { sut } = makeSut(subsidiaryRepository, contractFinder, uuidAdapter);
+    const { sut } = makeSut(
+      subsidiaryRepositoryMock,
+      contractFinderMock,
+      uuidAdapterMock
+    );
 
-    const createdRequest = await sut.make(maintenanceRequestDto);
+    const createdRequest = await sut.make(maintenanceRequestDtoMock);
 
-    expect(createdRequest.contract.number).toBe(contractDto.number);
+    expect(createdRequest.contract.number).toBe(contractDtoMock.number);
   });
 
   it('Should validate the contract when not found in the ERP', async () => {
-    const { uuidAdapter } = makeUuidMock();
-    const { maintenanceRequestDto } = makeMaintenanceRequestDto();
-    const { contractDto } = makeContractDto(maintenanceRequestDto);
-    const { mockedSubsidiary } = makeSubsidiary(maintenanceRequestDto);
-    const { subsidiaryRepository } = makeSubsidiaryRepository(mockedSubsidiary);
-    const { contractFinder } = makeContractFinder(
-      maintenanceRequestDto,
-      contractDto
+    const { uuidAdapterMock } = makeUuidAdapterMock();
+    const { maintenanceRequestDtoMock } = makeMaintenanceRequestDtoMock();
+    const { contractDtoMock } = makeContractDtoMock(maintenanceRequestDtoMock);
+    const { subsidiaryMock } = makeSubsidiaryMock(maintenanceRequestDtoMock);
+    const { subsidiaryRepositoryMock } =
+      makeSubsidiaryRepositoryMock(subsidiaryMock);
+    const { contractFinderMock } = makeContractFinderMock(
+      maintenanceRequestDtoMock,
+      contractDtoMock
     );
-    contractFinder.search = (contractNumber: string) => {
+    contractFinderMock.search = (contractNumber: string) => {
       return null;
     };
-    const { sut } = makeSut(subsidiaryRepository, contractFinder, uuidAdapter);
+    const { sut } = makeSut(
+      subsidiaryRepositoryMock,
+      contractFinderMock,
+      uuidAdapterMock
+    );
 
     const expectedMessage = 'The contract was not found in the ERP';
 
-    expect(() => sut.make(maintenanceRequestDto)).rejects.toThrow(
+    expect(() => sut.make(maintenanceRequestDtoMock)).rejects.toThrow(
       expectedMessage
     );
   });
 
   it('The created request should contain the subsidiary', async () => {
-    const { uuidAdapter } = makeUuidMock();
-    const { maintenanceRequestDto } = makeMaintenanceRequestDto();
-    const { contractDto } = makeContractDto(maintenanceRequestDto);
-    const { mockedSubsidiary } = makeSubsidiary(maintenanceRequestDto);
-    const { subsidiaryRepository } = makeSubsidiaryRepository(mockedSubsidiary);
-    const { contractFinder } = makeContractFinder(
-      maintenanceRequestDto,
-      contractDto
+    const { uuidAdapterMock } = makeUuidAdapterMock();
+    const { maintenanceRequestDtoMock } = makeMaintenanceRequestDtoMock();
+    const { contractDtoMock } = makeContractDtoMock(maintenanceRequestDtoMock);
+    const { subsidiaryMock } = makeSubsidiaryMock(maintenanceRequestDtoMock);
+    const { subsidiaryRepositoryMock } =
+      makeSubsidiaryRepositoryMock(subsidiaryMock);
+    const { contractFinderMock } = makeContractFinderMock(
+      maintenanceRequestDtoMock,
+      contractDtoMock
     );
-    const { sut } = makeSut(subsidiaryRepository, contractFinder, uuidAdapter);
+    const { sut } = makeSut(
+      subsidiaryRepositoryMock,
+      contractFinderMock,
+      uuidAdapterMock
+    );
 
-    const createdRequest = await sut.make(maintenanceRequestDto);
+    const createdRequest = await sut.make(maintenanceRequestDtoMock);
 
-    expect(createdRequest.subsidiaryIdentifier).toBe(mockedSubsidiary.id);
+    expect(createdRequest.subsidiaryIdentifier).toBe(subsidiaryMock.id);
   });
 
   it('Should validate the subsidiary when not found', async () => {
-    const { uuidAdapter } = makeUuidMock();
-    const { maintenanceRequestDto } = makeMaintenanceRequestDto();
-    const { contractDto } = makeContractDto(maintenanceRequestDto);
-    const { mockedSubsidiary } = makeSubsidiary(maintenanceRequestDto);
-    const { subsidiaryRepository } = makeSubsidiaryRepository(mockedSubsidiary);
-    const { contractFinder } = makeContractFinder(
-      maintenanceRequestDto,
-      contractDto
+    const { uuidAdapterMock } = makeUuidAdapterMock();
+    const { maintenanceRequestDtoMock } = makeMaintenanceRequestDtoMock();
+    const { contractDtoMock } = makeContractDtoMock(maintenanceRequestDtoMock);
+    const { subsidiaryMock } = makeSubsidiaryMock(maintenanceRequestDtoMock);
+    const { subsidiaryRepositoryMock } =
+      makeSubsidiaryRepositoryMock(subsidiaryMock);
+    const { contractFinderMock } = makeContractFinderMock(
+      maintenanceRequestDtoMock,
+      contractDtoMock
     );
-    subsidiaryRepository.searchById = (id: string) => {
+    subsidiaryRepositoryMock.searchById = (id: string) => {
       return null;
     };
-    const { sut } = makeSut(subsidiaryRepository, contractFinder, uuidAdapter);
+    const { sut } = makeSut(
+      subsidiaryRepositoryMock,
+      contractFinderMock,
+      uuidAdapterMock
+    );
 
     const expectedMessage = 'The subsubsidiary was not found';
 
-    expect(() => sut.make(maintenanceRequestDto)).rejects.toThrow(
+    expect(() => sut.make(maintenanceRequestDtoMock)).rejects.toThrow(
       expectedMessage
     );
   });

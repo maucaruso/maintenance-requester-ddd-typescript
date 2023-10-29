@@ -6,11 +6,11 @@ import { Subsidiary } from '@domain/subsidiaries/Subsidiary';
 
 jest.mock('@domain/subsidiaries/Subsidiary');
 
-const makeSubsidiary = (maintenanceRequestDto: MaintenanceRequesterDto) => {
-  const mockedSubsidiary = new Subsidiary() as jest.Mocked<Subsidiary>;
-  mockedSubsidiary.id = maintenanceRequestDto.subsidiaryIdentifier;
+const makeSubsidiaryMock = (maintenanceRequestDto: MaintenanceRequesterDto) => {
+  const subsidiaryMock = new Subsidiary() as jest.Mocked<Subsidiary>;
+  subsidiaryMock.id = maintenanceRequestDto.subsidiaryIdentifier;
 
-  return { mockedSubsidiary };
+  return { subsidiaryMock };
 };
 
-export { makeSubsidiary };
+export { makeSubsidiaryMock };

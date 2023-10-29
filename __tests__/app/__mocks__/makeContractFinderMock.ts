@@ -2,19 +2,15 @@ import { ContractDto } from '@app/maintenanceRequester/ContractDto';
 import { IContractFinder } from '@app/maintenanceRequester/IContractFinder';
 import { MaintenanceRequesterDto } from '@app/maintenanceRequester/MaintenanceRequesterDto';
 
-const makeContractFinder = (
+const makeContractFinderMock = (
   maintenanceRequestDto: MaintenanceRequesterDto,
   contractDto: ContractDto
 ) => {
-  class ContractFinder implements IContractFinder {
-    async search(contractNumber: string) {
-      return contractDto;
-    }
-  }
+  const contractFinderMock: IContractFinder = {
+    search: jest.fn().mockReturnValue(Promise.resolve(contractDto)),
+  };
 
-  const contractFinder = new ContractFinder();
-
-  return { contractFinder };
+  return { contractFinderMock };
 };
 
-export { makeContractFinder };
+export { makeContractFinderMock };

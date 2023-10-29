@@ -2,8 +2,8 @@ import { MaintenanceRequesterDto } from '@app/maintenanceRequester/MaintenanceRe
 import { MaintenanceRequestTypeEnum } from '@domain/maintenanceRequester/MaintenanceRequestTypeEnum';
 import { increaseMonths } from '@helpers/increaseMonths';
 
-const makeMaintenanceRequestDto = () => {
-  const maintenanceRequestDto = Object.assign(new MaintenanceRequesterDto(), {
+const makeMaintenanceRequestDtoMock = () => {
+  const maintenanceRequestDtoMock: MaintenanceRequesterDto = {
     subsidiaryIdentifier: 'XPTO-ABC',
     requesterIdentifier: 1,
     requesterName: 'Ricardo José',
@@ -11,9 +11,9 @@ const makeMaintenanceRequestDto = () => {
     justification: 'High Grass',
     contractNumber: '2135',
     desiredMaintenanceStartDate: increaseMonths(new Date(), 2),
-  });
+  };
 
-  return { maintenanceRequestDto };
+  return { maintenanceRequestDtoMock };
 };
 
-export { makeMaintenanceRequestDto };
+export { makeMaintenanceRequestDtoMock };
